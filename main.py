@@ -28,10 +28,4 @@ async def main():
         print(n)
         n += 1
         await asyncio.sleep(1)
-
-<<<<<<< HEAD
 asyncio.run(main())
-=======
-asyncio.run(main())  # Run main application code
- 
->>>>>>> 4794d5ce60562bd6c930a67ce1de1a0344db4157
