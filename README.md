@@ -1,2 +1,2 @@
-# esp32
+# Raspberry Pi Pico
 
