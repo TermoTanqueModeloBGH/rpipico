@@ -26,13 +26,27 @@ led=machine.Pin("LED", Pin.OUT)
 r=machine.Pin(16, Pin.OUT)
 r.value(1)
 
-#inicializacion y valores default
-estado = {
+#inicializacion y valores default o guardados en un JSON
+try:
+    with open("estado.json","r") as f:
+        estado=json.load(f)
+    print("datos almacenados cargados")
+except OSError as e:
+    print("sin datos guardados\nse guardan los de default")
+    estado = {
     "setpoint": 25.0,
     "modo": "auto", #puede ser "auto" o "manual"
     "periodo": 25,
     "rele_orden": False  # lo que se recibe por el topico rele
-}
+    }
+
+#Guardado de datos
+def guardar_datos():  
+    try:
+        with open("estado.json", "w") as f:
+            json.dump(estado, f)
+    except OSError:
+        print("Error guardando en flash")
 
 #Para recibir los datos del MQTTX
 async def messages(client):
@@ -41,19 +55,27 @@ async def messages(client):
         instruccion=topic.decode()
         valor=msg.decode()
 
+        band=False #bandera para guardar solo si hubo algun cambio
+
         print(f"comando recibido: {instruccion}->{valor}")
 
         if instruccion.endswith('/setpoint'):
             estado["setpoint"]=float(valor)
+            band=True
         elif instruccion.endswith('/periodo'):
             estado["periodo"]=int(valor)
+            band=True
         elif instruccion.endswith('/modo'):
             estado["modo"]=valor.lower() # 'auto' o 'manual'
+            band=True
         elif instruccion.endswith('/rele'):
             estado["rele_orden"]=valor == "1"
+            band=True
         elif instruccion.endswith('/destello'):
             evento.set() #se activa el evento del destello
-
+            band=True
+        if band == True:
+           guardar_datos()
 async def destello():
     while True:
         await evento.wait()
@@ -84,10 +106,9 @@ async def up(client):
 
 async def main(client):
     await client.connect()
-    for coroutine in (up, messages, destello):
-        asyncio.create_task(up(client))
-        asyncio.create_task(messages(client))
-        asyncio.create_task(destello())
+    asyncio.create_task(up(client))
+    asyncio.create_task(messages(client))
+    asyncio.create_task(destello())
     while True:
         try:
             d.measure()
@@ -100,7 +121,10 @@ async def main(client):
                 else:
                     r.value(1) #apagar
             else:
-                r.value(0 if estado["rele_orden"] else 1)
+                if estado["rele_orden"]:
+                    r.value(0)
+                else:
+                    r.value(1)
     
             datos= {
                 "temperatura":temperatura,
