@@ -1,1 +1,5 @@
+*.crt
+*.pem
+*.key
 settings.py
+.env
