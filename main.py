@@ -1,5 +1,6 @@
 from machine import Pin
 from mqtt_as import MQTTClient
+import settings
 from mqtt_local import config
 import uasyncio as asyncio
 import dht, machine, json
@@ -140,11 +141,24 @@ async def main(client):
             print("sin sensor")
         await asyncio.sleep(estado["periodo"])  # manda cada cuanto
 
+config['ssid'] = settings.SSID
+config['wifi_pw'] = settings.password
+config['server'] = settings.BROKER
+config['port'] = settings.PORT
+config['user'] = settings.MQTT_USER
+config['password'] = settings.MQTT_PASS
+
 # Define configuration
 config["queue_len"]=1 
 config['wifi_coro'] = wifi_han
 config['ssl'] = True #para cifrar los datos
 
+try:
+    with open("ca.crt", "rb") as f:
+        config['ssl_params'] = {"cadata": f.read()}
+except OSError:
+    print("AVISO: Falta el archivo ca.crt en la raíz de la placa para autenticar TLS.")
+    
 # Set up client
 MQTTClient.DEBUG = True  # Optional
 client = MQTTClient(config) #crea el objeto cliente
