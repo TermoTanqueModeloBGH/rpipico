@@ -84,12 +84,12 @@ async def destello():
             await asyncio.sleep_ms(200)
         led.off()
 
-# Manejador del estado del Wi-Fi
+# estado del Wi-Fi
 async def wifi_han(state):
     print('Wifi is ', 'up' if state else 'down')
     await asyncio.sleep(1)
 
-# Suscripción exclusiva a los tópicos de control del Bot
+# Suscripción a los tópicos del Bot
 async def up(client):
     while True:
         await client.up.wait()
@@ -137,7 +137,7 @@ async def main(client):
         await asyncio.sleep(estado["periodo"])  
 
 
-# Mapeo de las credenciales de settings.py a la librería
+# Mapeo de settings.py a la librería
 config['ssid'] = settings.SSID
 config['wifi_pw'] = settings.password
 config['server'] = settings.BROKER
@@ -151,7 +151,6 @@ config['ssl'] = True
 
 config['ssl_params'] = {"cert_reqs": 0} 
 
-# Inicialización única del cliente
 MQTTClient.DEBUG = True  
 client = MQTTClient(config)
 
