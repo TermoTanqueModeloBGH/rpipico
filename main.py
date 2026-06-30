@@ -61,7 +61,7 @@ async def up(client):
         await client.subscribe('nodo/comando', 1)
         await client.subscribe(f'{ID_DEL_DISPOSITIVO}/#', 1)
 
-# --- Bucle Principal (Lectura cada 60 segundos) ---
+# Lectura cada 60 segundos bucle
 async def main(client):
     print(f"Intentando conectar al broker en {settings.BROKER}...")
     await client.connect()
@@ -87,7 +87,6 @@ async def main(client):
             print("Error al leer el sensor DHT11.")
         await asyncio.sleep(estado["periodo"])  
 
-
 config['ssid'] = settings.SSID
 config['wifi_pw'] = settings.password
 config['server'] = settings.BROKER
@@ -102,7 +101,6 @@ config['ssl_params'] = {"cert_reqs": 0}
 
 MQTTClient.DEBUG = True  
 client = MQTTClient(config)
-
 
 try:
     asyncio.run(main(client))
